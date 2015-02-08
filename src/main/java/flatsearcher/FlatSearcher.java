@@ -46,10 +46,10 @@ public class FlatSearcher implements Runnable {
         while (true) {
             for (int i = 0; i < tray.getSearchers().size(); i++) {
                 Searcher searcher = tray.getSearchers().get(i);
-                if (tray.getCheckboxes().get(i).getState()) {
+                searcher.setSearchEnabled(tray.getCheckboxes().get(i).getState());
+                if (searcher.isSearchEnabled()) {
                     try {
                         searcher.findAds();
-                        System.out.println(searcher.getAdvertisements().size()+" "+searcher.getPremiumAdvertisements().size());
                     } catch (UnknownHostException e) {
                         JOptionPane.showMessageDialog(null, e.getMessage() + ": It seems that internet connection is refused. Please check", "InfoBox: " + e.getClass(), JOptionPane.INFORMATION_MESSAGE);
                         e.printStackTrace();
@@ -58,11 +58,11 @@ public class FlatSearcher implements Runnable {
                         e.printStackTrace();
                         log.print(e.getClass() + ": " + e.getMessage() + ", " + searcher.getName());
                     }
-                    String newFirstAd;
+                    int newFirstAd;
                     //block for validation of normal ads
                     if(searcher.getAdvertisements().size()>0){
                         newFirstAd = searcher.getAdvertisements().getFirst().getUniqueID();
-                        if (!searcher.getTheFirstAd().equals(newFirstAd)) {
+                        if (searcher.getTheFirstAd()!=(newFirstAd)) {
                             searcher.setTheFirstAd(newFirstAd);
                             log.print("New ad: " + newFirstAd + ", " + searcher.getName());
                             if (notificationMode) {
@@ -94,38 +94,40 @@ public class FlatSearcher implements Runnable {
                         log.print(e.getClass() + ": " + e.getMessage() + ", " + searcher.getName());
                     }
                     //block for validation of Premium ads
-                    if(searcher.getPremiumAdvertisements().size()>0){
-                        newFirstAd = searcher.getPremiumAdvertisements().getFirst().getUniqueID();
-                        if (!searcher.getTheFirstPremiumAd().equals(newFirstAd)) {
-                            searcher.setTheFirstPremiumAd(newFirstAd);
-                            log.print("New ad: " + newFirstAd + ", " + searcher.getName());
-                            if (notificationMode) {
-                                if (searcher.getPremiumAdvertisements().getFirst() instanceof NeagentAd) {
-                                    NeagentAd tempAd = (NeagentAd) searcher.getPremiumAdvertisements().getFirst();
-                                    messageToShow = null;
-                                    addMessageToShow("Цена: " + String.valueOf(tempAd.getPrice()));
-                                    addMessageToShow("Кол-во комнат: " + String.valueOf(tempAd.getNumberOfRooms()));
-                                    addMessageToShow("Адрес: " + String.valueOf(tempAd.getAddress()));
-                                    tray.getTrayIcon().displayMessage(tempAd.getTitle(), messageToShow, MessageType.INFO);
+                    if(searcher.isPremiumEnabled()) {
+                        if (searcher.getPremiumAdvertisements().size() > 0) {
+                            newFirstAd = searcher.getPremiumAdvertisements().getFirst().getUniqueID();
+                            if (searcher.getTheFirstPremiumAd()!=(newFirstAd)) {
+                                searcher.setTheFirstPremiumAd(newFirstAd);
+                                log.print("New ad: " + newFirstAd + ", " + searcher.getName());
+                                if (notificationMode) {
+                                    if (searcher.getPremiumAdvertisements().getFirst() instanceof NeagentAd) {
+                                        NeagentAd tempAd = (NeagentAd) searcher.getPremiumAdvertisements().getFirst();
+                                        messageToShow = null;
+                                        addMessageToShow("Цена: " + String.valueOf(tempAd.getPrice()));
+                                        addMessageToShow("Кол-во комнат: " + String.valueOf(tempAd.getNumberOfRooms()));
+                                        addMessageToShow("Адрес: " + String.valueOf(tempAd.getAddress()));
+                                        tray.getTrayIcon().displayMessage(tempAd.getTitle(), messageToShow, MessageType.INFO);
+                                    }
+                                    tray.setUrlToOpen(searcher.getPremiumAdvertisements().getFirst().getUrl());
+                                } else {
+                                    try {
+                                        tray.openWebpage(new URI(searcher.getPremiumAdvertisements().getFirst().getUrl()));
+                                    } catch (URISyntaxException e) {
+                                        e.printStackTrace();
+                                        log.print(e.getClass() + ": " + e.getMessage() + ", " + searcher.getName());
+                                    }
                                 }
-                                tray.setUrlToOpen(searcher.getPremiumAdvertisements().getFirst().getUrl());
-                            } else{
-                                try{
-                                    tray.openWebpage(new URI(searcher.getPremiumAdvertisements().getFirst().getUrl()));
-                                }catch (URISyntaxException e) {
-                                    e.printStackTrace();
-                                    log.print(e.getClass() + ": " + e.getMessage() + ", " + searcher.getName());
-                                }
+                            } else {
+                                System.out.println("Premium: " + searcher.getTheFirstPremiumAd() + " " + searcher.getName());
                             }
-                        }else{
-                            System.out.println("Premium: "+searcher.getTheFirstPremiumAd() + " " + searcher.getName());
                         }
-                    }
-                    try {
-                        Thread.sleep(searcher.getSleepInterval()/2);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        log.print(e.getClass() + ": " + e.getMessage() + ", " + searcher.getName());
+                        try {
+                            Thread.sleep(searcher.getSleepInterval() / 2);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            log.print(e.getClass() + ": " + e.getMessage() + ", " + searcher.getName());
+                        }
                     }
                 }
             }

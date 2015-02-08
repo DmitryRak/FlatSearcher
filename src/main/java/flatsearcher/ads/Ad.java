@@ -6,7 +6,8 @@ package flatsearcher.ads;
  */
 
 public abstract class Ad {
-    private String uniqueID;
+    private String numberOfRooms;
+    private int uniqueID;
     private int price;
     private String title;
     private String shortDescription;
@@ -44,11 +45,20 @@ public abstract class Ad {
         return url;
     }
 
-    public void setUniqueID(String uniqueID) {
+    public void setUniqueID(int uniqueID) {
         this.uniqueID = uniqueID;
     }
 
-    public String getUniqueID() {
+    public int getUniqueID() {
         return uniqueID;
     }
+
+    public String getNumberOfRooms() {
+        return numberOfRooms;
+    }
+
+    public void setNumberOfRooms(String rooms) {
+        this.numberOfRooms = rooms;
+    }
+
 }

@@ -1,7 +1,9 @@
 package flatsearcher;
 
+import flatsearcher.ads.Ad;
 import flatsearcher.ads.KvartirantAd;
 import flatsearcher.ads.NeagentAd;
+import flatsearcher.ads.OnlinerAd;
 import flatsearcher.others.ConfigReader;
 import flatsearcher.others.LogWriter;
 import flatsearcher.searchers.Searcher;
@@ -73,6 +75,13 @@ public class FlatSearcher implements Runnable {
                                     addMessageToShow("Кол-во комнат: " + String.valueOf(tempAd.getNumberOfRooms()));
                                     addMessageToShow("Адрес: " + String.valueOf(tempAd.getAddress()));
                                     tray.getTrayIcon().displayMessage(tempAd.getTitle(), messageToShow, MessageType.INFO);
+                                }else if (searcher.getAdvertisements().getFirst() instanceof OnlinerAd){
+                                    OnlinerAd tempAd = (OnlinerAd) searcher.getAdvertisements().getFirst();
+                                    messageToShow = null;
+                                    addMessageToShow("Цена: " + String.valueOf(tempAd.getPrice()));
+                                    addMessageToShow("Кол-во комнат: " + String.valueOf(tempAd.getNumberOfRooms()));
+                                    addMessageToShow("Адрес: " + String.valueOf(tempAd.getAddress()));
+                                    tray.getTrayIcon().displayMessage(tempAd.getTitle(), messageToShow, MessageType.INFO);
                                 }
                                 tray.setUrlToOpen(searcher.getAdvertisements().getFirst().getUrl());
                             } else{
@@ -84,7 +93,7 @@ public class FlatSearcher implements Runnable {
                                 }
                             }
                         } else{
-                            System.out.println("Normal: "+searcher.getTheFirstAd() + " " + searcher.getName());
+                            System.out.println("Normal: " + searcher.getTheFirstAd() + " " + searcher.getName());
                         }
                     }
                     try {
